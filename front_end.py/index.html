@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+
+    <!-- Connect the CSS file -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Connect the JavaScript file -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <header>
+        <h1>Student Management System</h1>
+        <p>SQL Server | Student Records | Marks | Grades | Rankings | Reports</p>
+    </header>
+
+    <main class="container">
+
+        <!-- Dashboard statistics -->
+        <section class="cards">
+            <div class="card">
+                <span>Total Students</span>
+                <strong id="totalStudents">0</strong>
+            </div>
+
+            <div class="card">
+                <span>Courses</span>
+                <strong id="totalCourses">0</strong>
+            </div>
+
+            <div class="card">
+                <span>Average per Student</span>
+                <strong id="classAverage">0.00</strong>
+            </div>
+
+            <div class="card">
+                <span>Passed</span>
+                <strong id="passedCount">0</strong>
+            </div>
+
+            <div class="card">
+                <span>Failed</span>
+                <strong id="failedCount">0</strong>
+            </div>
+        </section>
+
+        <!-- Add or edit student -->
+        <section class="panel" id="student-editor">
+            <h2 id="formTitle">Add Student</h2>
+
+            <p class="muted">
+                Enter marks from 0 to 100 for each subject.
+                Passing requires at least 40 marks in every subject.
+            </p>
+
+            <form id="studentForm">
+                <input id="studentId" type="hidden">
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="name">Student Name *</label>
+                        <input id="name" maxlength="100" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="age">Age *</label>
+                        <input id="age" type="number"
+                               min="5" max="100" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="course">Course *</label>
+                        <input id="course" maxlength="100" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="email">Email</label>
+                        <input id="email" type="email">
+                    </div>
+
+                    <div class="field">
+                        <label for="python">Python</label>
+                        <input id="python" type="number"
+                               min="0" max="100" step="0.01" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="java">Java</label>
+                        <input id="java" type="number"
+                               min="0" max="100" step="0.01" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="os">OS</label>
+                        <input id="os" type="number"
+                               min="0" max="100" step="0.01" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="dbms">DBMS</label>
+                        <input id="dbms" type="number"
+                               min="0" max="100" step="0.01" required>
+                    </div>
+
+                    <div class="field">
+                        <label for="physics">Physics</label>
+                        <input id="physics" type="number"
+                               min="0" max="100" step="0.01" required>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button id="saveButton" type="submit">
+                        Add Student
+                    </button>
+
+                    <button class="secondary" id="resetButton" type="button">
+                        Clear Form
+                    </button>
+
+                    <button class="secondary" id="refreshButton" type="button">
+                        Refresh from Database
+                    </button>
+                </div>
+
+                <div class="message" id="message" role="status">
+                    Connecting to API...
+                </div>
+            </form>
+        </section>
+
+        <!-- All student records -->
+        <section class="panel">
+            <h2>All Students</h2>
+
+            <div class="toolbar">
+                <input id="search" type="search"
+                       placeholder="Search by ID, name, course or email">
+                <span class="muted">Search updates as you type.</span>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Course</th>
+                            <th>Email</th>
+                            <th>Python</th>
+                            <th>Java</th>
+                            <th>OS</th>
+                            <th>DBMS</th>
+                            <th>Physics</th>
+                            <th>Total / 500</th>
+                            <th>Average</th>
+                            <th>Grade</th>
+                            <th>Result</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Pass and fail results -->
+        <div class="two-col">
+            <section class="panel">
+                <h2>Pass / Fail Results</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Result</th>
+                            </tr>
+                        </thead>
+                        <tbody id="passFailTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Grade filtering -->
+            <section class="panel">
+                <h2>Grade Calculation / Find by Grade</h2>
+
+                <div class="toolbar">
+                    <select id="gradeFilter">
+                        <option value="">All Grades</option>
+                        <option value="A+">A+</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
+                        <option value="F">F</option>
+                    </select>
+
+                    <button id="searchByGradeButton" type="button">
+                        Filter Grades
+                    </button>
+                </div>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Average</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeTable"></tbody>
+                    </table>
+                </div>
+
+                <p class="muted">
+                    Grade scale: A+ >= 90, A >= 80, B >= 70,
+                    C >= 60, D >= 50, F below 50.
+                </p>
+            </section>
+        </div>
+
+        <!-- Subject toppers and ranking -->
+        <div class="two-col">
+            <section class="panel">
+                <h2>Subject-wise Toppers</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Topper</th>
+                                <th>Mark</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topperTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Student Rank List</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Student</th>
+                                <th>Total</th>
+                                <th>Average</th>
+                                <th>Grade</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rankTable"></tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- Subject performance and statistics -->
+        <div class="two-col">
+            <section class="panel">
+                <h2>Subject Performance</h2>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Average</th>
+                                <th>Highest</th>
+                                <th>Lowest</th>
+                                <th>Students</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectTable"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel">
+                <h2>Student Statistics</h2>
+
+                <div class="cards">
+                    <div class="card">
+                        <span>Marks Entered</span>
+                        <strong id="marksEntered">0</strong>
+                    </div>
+
+                    <div class="card">
+                        <span>Average of All Marks</span>
+                        <strong id="overallAverage">0.00</strong>
+                    </div>
+
+                    <div class="card">
+                        <span>Highest Mark</span>
+                        <strong id="highestMark">—</strong>
+                    </div>
+
+                    <div class="card">
+                        <span>Lowest Mark</span>
+                        <strong id="lowestMark">—</strong>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <footer class="muted">
+            This page requires the FastAPI backend and SQL Server
+            database to be running.
+        </footer>
+
+    </main>
+</body>
+</html>
